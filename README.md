@@ -63,7 +63,8 @@ Aventra-job/
 
 ## ✨ Features
 
-- 🔐 **JWT authentication** with role-based access (`candidate`, `recruiter`, `admin`)
+- 🔐 **Flexible authentication** — sign in with **Google** *or* your own **email + password**
+- 🔑 **JWT-based sessions** with role-based access (`candidate`, `recruiter`, `admin`)
 - 📝 **User registration & login** with secure bcrypt password hashing
 - 💼 **Job listings** — create, browse, and view job details
 - 🏢 **Company profiles** with verification workflow
@@ -144,8 +145,9 @@ Base URL: `http://localhost:4000/api/v1`
 | Method | Endpoint | Description | Auth |
 |--------|----------|-------------|------|
 | `GET`  | `/health` | Server health check | ❌ |
-| `POST` | `/auth/register` | Register a new user | ❌ |
-| `POST` | `/auth/login` | Login & receive JWT | ❌ |
+| `POST` | `/auth/register` | Register a new user (password optional) | ❌ |
+| `POST` | `/auth/login` | Login with email + password | ❌ |
+| `POST` | `/auth/google` | Sign in / sign up with a Google credential | ❌ |
 | `GET`  | `/jobs` | List all approved jobs | ❌ |
 | `POST` | `/jobs` | Create a new job posting | ✅ |
 | `GET`  | `/companies` | List companies | ❌ |
@@ -154,6 +156,25 @@ Base URL: `http://localhost:4000/api/v1`
 | `GET`  | `/admin/...` | Admin moderation routes | 🔒 Admin |
 
 > All protected routes require an `Authorization: Bearer <token>` header.
+
+---
+
+## 🔐 Authentication Options
+
+AventraJob supports **two ways** to sign in or sign up:
+
+### 1️⃣ Continue with Google (one click)
+Click **"Continue with Google"** on the login or register page and pick a Google account from the picker. No password required — the backend creates or links the account automatically and issues a JWT.
+
+- Frontend component: [`frontend/src/app/components/google-sign-in-button.tsx`](frontend/src/app/components/google-sign-in-button.tsx)
+- Backend endpoint: `POST /api/v1/auth/google` → see [`backend/src/routes/auth.ts`](backend/src/routes/auth.ts)
+
+### 2️⃣ Email + Password (classic)
+Register with your email and a password of your choice, then log in normally.
+
+- Password is **optional** during registration — leaving it blank means you'll sign in via Google next time.
+- Passwords are hashed with **bcrypt** before storage; the hash is never returned by the API.
+- Minimum password length: **6 characters**.
 
 ---
 
@@ -189,11 +210,12 @@ PORT=4000
 1. **Full-stack architecture** — clean separation between API and UI.
 2. **TypeScript everywhere** — shared types, Prisma-generated types, strict TS config.
 3. **Authentication & Authorization** — JWT + role-based middleware (`requireAuth`, `requireAdmin`).
-4. **Database migrations** — versioned with Prisma; reproducible across environments.
-5. **Security best practices** — bcrypt hashing, helmet headers, CORS config, password never returned.
-6. **Production-ready patterns** — graceful shutdown, error handling, request logging, compression.
-7. **Modern frontend** — Next.js App Router, React 19, Tailwind v4, persistent auth on the client.
-8. **Containerization** — Docker Compose for Postgres + Redis when scaling beyond SQLite.
+4. **OAuth & password auth** — both Google OAuth and email+password sign-in flows.
+5. **Database migrations** — versioned with Prisma; reproducible across environments.
+6. **Security best practices** — bcrypt hashing, helmet headers, CORS config, password never returned.
+7. **Production-ready patterns** — graceful shutdown, error handling, request logging, compression.
+8. **Modern frontend** — Next.js App Router, React 19, Tailwind v4, persistent auth on the client.
+9. **Containerization** — Docker Compose for Postgres + Redis when scaling beyond SQLite.
 
 ---
 

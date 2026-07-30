@@ -7,6 +7,9 @@ export type UserRecord = {
   fullName: string;
   role: string;
   isVerified: boolean;
+  googleId?: string;
+  avatarUrl?: string;
+  authProvider?: 'password' | 'google';
 };
 
 export type CompanyRecord = {
@@ -175,6 +178,9 @@ export const getUserByEmail = (email: string) => {
 export const getUserById = (id: string) =>
   mockState.users.find((user) => user.id === id) ?? null;
 
+export const getUserByGoogleId = (googleId: string) =>
+  mockState.users.find((user) => user.googleId === googleId) ?? null;
+
 export const createUserRecord = async (input: {
   email: string;
   password: string;
@@ -189,6 +195,43 @@ export const createUserRecord = async (input: {
     fullName: input.fullName,
     role: input.role ?? 'candidate',
     isVerified: true,
+    authProvider: 'password',
+  };
+  mockState.users.push(record);
+  return record;
+};
+
+export const upsertGoogleUser = (input: {
+  googleId: string;
+  email: string;
+  fullName: string;
+  avatarUrl?: string;
+  role?: string;
+}) => {
+  const existing = getUserByGoogleId(input.googleId);
+  if (existing) {
+    return existing;
+  }
+
+  // Link by email if an account with this email already exists
+  const byEmail = getUserByEmail(input.email);
+  if (byEmail) {
+    byEmail.googleId = input.googleId;
+    byEmail.avatarUrl = input.avatarUrl;
+    byEmail.authProvider = byEmail.authProvider ?? 'google';
+    return byEmail;
+  }
+
+  const record: UserRecord = {
+    id: `user-${mockState.users.length + 1}`,
+    email: input.email,
+    passwordHash: '',
+    fullName: input.fullName,
+    role: input.role ?? 'candidate',
+    isVerified: true,
+    googleId: input.googleId,
+    avatarUrl: input.avatarUrl,
+    authProvider: 'google',
   };
   mockState.users.push(record);
   return record;

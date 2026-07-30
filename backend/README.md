@@ -62,8 +62,10 @@ Base URL: `http://localhost:4000`
 
 ### Public
 - `GET  /health` — health check
-- `POST /api/v1/auth/register` — create account
-- `POST /api/v1/auth/login` — login, returns JWT
+- `POST /api/v1/auth/register` — create account (password optional)
+- `POST /api/v1/auth/login` — login with email + password
+- `POST /api/v1/auth/google` — sign in / sign up with a Google credential
+- `GET  /api/v1/auth/me` — get current user from JWT
 - `GET  /api/v1/jobs` — list approved jobs
 - `GET  /api/v1/companies` — list companies
 

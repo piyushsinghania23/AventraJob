@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchJson, setAuthToken } from '../../api';
+import GoogleSignInButton from '../../components/google-sign-in-button';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -20,9 +21,13 @@ export default function RegisterPage() {
     setIsSubmitting(true);
 
     try {
+      const payload: Record<string, string> = { fullName, email, role };
+      if (password.trim().length > 0) {
+        payload.password = password;
+      }
       const data = await fetchJson<{ token: string }>('/auth/register', {
         method: 'POST',
-        body: JSON.stringify({ fullName, email, password, role }),
+        body: JSON.stringify(payload),
       });
       setAuthToken(data.token);
       router.push('/dashboard');
@@ -33,13 +38,17 @@ export default function RegisterPage() {
     }
   }
 
+  function continueWithGoogle() {
+    router.push('/dashboard');
+  }
+
   return (
     <main className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top_left,_rgba(16,185,129,0.22),_transparent_24%),linear-gradient(135deg,_#020617,_#111827)] px-6 py-16 text-slate-100">
       <div className="w-full max-w-lg rounded-3xl border border-white/10 bg-slate-950/80 p-8 shadow-2xl shadow-emerald-950/20 backdrop-blur-xl">
         <div className="mb-8">
           <p className="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-300">Join the platform</p>
           <h1 className="mt-2 text-3xl font-semibold">Build your career or hire the right talent.</h1>
-          <p className="mt-3 text-sm text-slate-400">Choose your role and get started with verified opportunities and modern recruiting tools.</p>
+          <p className="mt-3 text-sm text-slate-400">Sign up with Google instantly, or create an account using your email and a password.</p>
         </div>
 
         <div className="grid gap-3 md:grid-cols-2">
@@ -53,7 +62,22 @@ export default function RegisterPage() {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <div className="mt-6">
+          <GoogleSignInButton
+            role={role}
+            label="Sign up with Google"
+            accent="emerald"
+            onSuccess={continueWithGoogle}
+          />
+        </div>
+
+        <div className="my-6 flex items-center gap-3 text-xs uppercase tracking-[0.3em] text-slate-500">
+          <span className="h-px flex-1 bg-white/10" />
+          <span>or use email</span>
+          <span className="h-px flex-1 bg-white/10" />
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="mb-2 block text-sm text-slate-300" htmlFor="fullName">Full name</label>
             <input id="fullName" value={fullName} onChange={(event) => setFullName(event.target.value)} className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3" placeholder="Aarav Sharma" />
@@ -63,7 +87,9 @@ export default function RegisterPage() {
             <input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3" placeholder="you@company.com" />
           </div>
           <div>
-            <label className="mb-2 block text-sm text-slate-300" htmlFor="password">Password</label>
+            <label className="mb-2 block text-sm text-slate-300" htmlFor="password">
+              Password <span className="text-xs text-slate-500">(optional — leave blank to sign in with Google later)</span>
+            </label>
             <input id="password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3" placeholder="••••••••" />
           </div>
           {error ? <p className="text-sm text-rose-300">{error}</p> : null}

@@ -68,3 +68,25 @@ export async function fetchAdminJson<T>(path: string, init?: RequestInit): Promi
   }
   return data as T;
 }
+
+export type GoogleCredential = {
+  sub: string;
+  email: string;
+  name: string;
+  picture?: string;
+  email_verified?: boolean;
+};
+
+export async function signInWithGoogle(
+  credential: GoogleCredential,
+  role?: string,
+): Promise<{ token: string; user: { id: string; email: string; fullName: string; role: string; avatarUrl?: string } }> {
+  const data = await fetchJson<{ token: string; user: { id: string; email: string; fullName: string; role: string; avatarUrl?: string } }>('/auth/google', {
+    method: 'POST',
+    body: JSON.stringify({ credential, role }),
+  });
+  if (data?.token) {
+    setAuthToken(data.token);
+  }
+  return data;
+}
